@@ -25,7 +25,7 @@ function determinePlatform(userAgent: string): Platform {
 }
 
 // middleware function to handle decisioning
-export async function abDecisioningMiddleware(req, res) {
+export async function abDecisioning(req, res) {
   const userAgent = req.headers['user-agent'];
   const deviceType = determinePlatform(userAgent);
 

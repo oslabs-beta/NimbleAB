@@ -43,7 +43,9 @@ export async function abDecisioningMiddleware(req, res) {
 
   // logic to select a variant based on weight
   function chooseVariant(deviceType: Platform, variants: Variant[]): Variant {
+    // sum all weights
     let totalWeight = variants.reduce((sum, v) => sum + v.weight, 0);
+    // generate random value to select variant
     let randomValue = Math.random() * totalWeight;
 
     for (const variant of variants) {

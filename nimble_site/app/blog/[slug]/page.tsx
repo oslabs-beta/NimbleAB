@@ -7,11 +7,6 @@ import NavBar from '../../../components/NavBar';
 import { notFound, redirect, useParams } from 'next/navigation';
 export const dynamicParams = false;
 
-export async function getBlogPost(slug: string) {
-  //Makes some fetch call to pull down blog post from database
-  return slug;
-}
-
 export default function BlogPost({ params }: { params: { slug: string } }) {
   const { slug } = params;
 

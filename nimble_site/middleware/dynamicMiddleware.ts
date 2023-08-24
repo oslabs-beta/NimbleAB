@@ -14,7 +14,7 @@ type Variant = {
 };
 
 // middleware function to handle decisioning
-export async function middleware(req: NextRequest) {
+export async function dynamicMiddleware(req: NextRequest) {
   // <-- changed the determination of userAgent per https://edge-user-agent-based-rendering.vercel.app/
   // parse user agent
   const { device } = userAgent(req);
@@ -22,18 +22,18 @@ export async function middleware(req: NextRequest) {
   const deviceType = device.type === 'mobile' ? 'mobile' : 'desktop';
 
   // fetch variants from Supabase
-  // the result will contain an array of variants and any potential fetchError
-  const { data: variants, error: fetchError } = await supabase
-    .from('variants')
-    .select('*');
+  const result = await supabase.from('variants').select('*');
 
-  if (fetchError) {
-    console.error('Error fetching variants from Supabase:', fetchError);
+  if (result.error || !result.data) {
+    console.error('Error fetching variants from Supabase:', result.error);
     // changed below to comply w/ next syntax
     return new NextResponse('Internal Server Error', {
       status: 500,
     });
   }
+
+  // the result will contain an array of variants
+  const variants = result.data;
 
   // logic to select a variant based on weight
   function chooseVariant(
@@ -84,6 +84,7 @@ export async function middleware(req: NextRequest) {
     res.cookies.set('variantID', chosenVariant.id, {
       path: '/',
       httpOnly: true,
+      maxAge: 10 * 365 * 24 * 60 * 60, //set it to 10 years
     });
   }
 

@@ -7,27 +7,15 @@ const supabaseKey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhd3JpZnZ6eWpxY2Rkd3VxanlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI2NTc2MjcsImV4cCI6MjAwODIzMzYyN30.-VekGbd6Iwey0Q32SQA0RxowZtqSlDptBhlt2r-GZBw';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// type Platform = 'mobile' | 'desktop' | 'other';
-
 type Variant = {
   id: string;
   fileName: string;
   weight: number;
 };
 
-// function to determine user platform based on User-Agent string
-// function determinePlatform(userAgent: string): Platform {
-//   if (userAgent.match(/mobile/i)) {
-//     return 'mobile';
-//   } else if (userAgent.match(/desktop/i)) {
-//     return 'desktop';
-//   }
-//   return 'other';
-// }
-
 // middleware function to handle decisioning
 export async function middleware(req: NextRequest) {
-  // <-- changed
+  // <-- changed the determination of userAgent per https://edge-user-agent-based-rendering.vercel.app/
   // parse user agent
   const { device } = userAgent(req);
   // check the deviceType
@@ -41,7 +29,10 @@ export async function middleware(req: NextRequest) {
 
   if (fetchError) {
     console.error('Error fetching variants from Supabase:', fetchError);
-    return NextResponse.error('Internal Server Error', 500); // <-- changed
+    // changed below to comply w/ next syntax
+    return new NextResponse('Internal Server Error', {
+      status: 500,
+    });
   }
 
   // logic to select a variant based on weight
@@ -79,18 +70,18 @@ export async function middleware(req: NextRequest) {
   }
 
   // increment count for the chosen variant in Supabase
-  // define increment function in supabase per https://www.youtube.com/watch?v=n5j_mrSmpyc
+  // increment function is defined in Functions under Database in supabase per https://www.youtube.com/watch?v=n5j_mrSmpyc
   const { data, error } = await supabase.rpc('increment', {
     row_id: chosenVariant.id,
   });
 
   // will log an error if update fails
-  const res = NextResponse.rewrite(`/${chosenVariant.fileName}`); // <-- changed
+  // changed below to comply with next syntax
+  const res = NextResponse.rewrite(`/${chosenVariant.fileName}`);
 
   if (!variantID) {
+    // changed below to comply with next syntax
     res.cookies.set('variantID', chosenVariant.id, {
-      // <-- changed
-      // maxAge: 3600,
       path: '/',
       httpOnly: true,
     });

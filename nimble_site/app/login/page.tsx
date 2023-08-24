@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import Messages from './messages'
+import Link from 'next/link';
+import Messages from './messages';
 
 export default function Login() {
   return (
@@ -21,7 +21,8 @@ export default function Login() {
           className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1"
         >
           <polyline points="15 18 9 12 15 6" />
-        </svg>{' '}
+        </svg>
+        {' '}
         Back
       </Link>
 
@@ -61,5 +62,5 @@ export default function Login() {
         <Messages />
       </form>
     </div>
-  )
+  );
 }

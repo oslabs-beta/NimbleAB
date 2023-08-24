@@ -30,6 +30,12 @@
   animation: animateIn 0.3s ease 0.15s both;
 }
 
+
+.shadown-bird et-in-viewport-check et-in-viewport-pulse_special
+{
+  animation: "3500ms ease 0s 1 normal forwards running pulse_special";
+}
+
 @keyframes animateIn {
   from {
     opacity: 0;

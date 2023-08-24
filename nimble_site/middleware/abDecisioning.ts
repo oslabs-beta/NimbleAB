@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse, userAgent } from 'next/server';
 
 // initialize Supabase client
 const supabaseUrl = 'https://tawrifvzyjqcddwuqjyq.supabase.co';
@@ -6,7 +7,7 @@ const supabaseKey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhd3JpZnZ6eWpxY2Rkd3VxanlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI2NTc2MjcsImV4cCI6MjAwODIzMzYyN30.-VekGbd6Iwey0Q32SQA0RxowZtqSlDptBhlt2r-GZBw';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-type Platform = 'mobile' | 'desktop' | 'other';
+// type Platform = 'mobile' | 'desktop' | 'other';
 
 type Variant = {
   id: string;
@@ -15,34 +16,39 @@ type Variant = {
 };
 
 // function to determine user platform based on User-Agent string
-function determinePlatform(userAgent: string): Platform {
-  if (userAgent.match(/mobile/i)) {
-    return 'mobile';
-  } else if (userAgent.match(/desktop/i)) {
-    return 'desktop';
-  }
-  return 'other';
-}
+// function determinePlatform(userAgent: string): Platform {
+//   if (userAgent.match(/mobile/i)) {
+//     return 'mobile';
+//   } else if (userAgent.match(/desktop/i)) {
+//     return 'desktop';
+//   }
+//   return 'other';
+// }
 
 // middleware function to handle decisioning
-export async function abDecisioning(req, res) {
-  const userAgent = req.headers['user-agent'];
-  const deviceType = determinePlatform(userAgent);
+export async function middleware(req: NextRequest) {
+  // <-- changed
+  // parse user agent
+  const { device } = userAgent(req);
+  // check the deviceType
+  const deviceType = device.type === 'mobile' ? 'mobile' : 'desktop';
 
   // fetch variants from Supabase
   // the result will contain an array of variants and any potential fetchError
   const { data: variants, error: fetchError } = await supabase
-    .from<Variant>('variants')
+    .from('variants')
     .select('*');
 
   if (fetchError) {
     console.error('Error fetching variants from Supabase:', fetchError);
-    res.status(500).send('Internal Server Error');
-    return;
+    return NextResponse.error('Internal Server Error', 500); // <-- changed
   }
 
   // logic to select a variant based on weight
-  function chooseVariant(deviceType: Platform, variants: Variant[]): Variant {
+  function chooseVariant(
+    deviceType: 'mobile' | 'desktop',
+    variants: Variant[]
+  ): Variant {
     // sum all weights
     let totalWeight = variants.reduce((sum, v) => sum + v.weight, 0);
     // generate random value to select variant
@@ -60,7 +66,7 @@ export async function abDecisioning(req, res) {
   }
 
   // check for existing cookie
-  const variantID = req.cookies['variantID'];
+  const variantID = req.cookies.get('variantID');
 
   let chosenVariant;
 
@@ -70,24 +76,25 @@ export async function abDecisioning(req, res) {
   } else {
     // if no cookie, select based on weight & device type
     chosenVariant = chooseVariant(deviceType, variants);
-    // set the cookie
-    res.setHeader(
-      'Set-Cookie',
-      `variantID=${chosenVariant.id}; Max-Age=3600; Path=/; HttpOnly`
-    );
   }
 
   // increment count for the chosen variant in Supabase
-  const { data, error } = await supabase
-    .from('variants')
-    .update({ times_called: 1 })
-    .eq('id', chosenVariant.id);
+  // define increment function in supabase per https://www.youtube.com/watch?v=n5j_mrSmpyc
+  const { data, error } = await supabase.rpc('increment', {
+    row_id: chosenVariant.id,
+  });
 
   // will log an error if update fails
-  if (error) {
-    console.error('Error updating Supabase:', error);
+  const res = NextResponse.rewrite(`/${chosenVariant.fileName}`); // <-- changed
+
+  if (!variantID) {
+    res.cookies.set('variantID', chosenVariant.id, {
+      // <-- changed
+      // maxAge: 3600,
+      path: '/',
+      httpOnly: true,
+    });
   }
 
-  // serve the selected variant to the user
-  res.sendFile(chosenVariant.fileName);
+  return res;
 }

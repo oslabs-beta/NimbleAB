@@ -7,33 +7,29 @@ const supabaseKey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhd3JpZnZ6eWpxY2Rkd3VxanlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI2NTc2MjcsImV4cCI6MjAwODIzMzYyN30.-VekGbd6Iwey0Q32SQA0RxowZtqSlDptBhlt2r-GZBw';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// define a type for a variant
 type Variant = {
   id: string;
   fileName: string;
   weight: number;
 };
 
-// middleware function to handle decisioning
+// middleware function to decide which variant to serve based on dynamic data from Supabase
 export async function dynamicMiddleware(req: NextRequest) {
-  // <-- changed the determination of userAgent per https://edge-user-agent-based-rendering.vercel.app/
-  // parse user agent
+  // parse user agent to get device information per https://edge-user-agent-based-rendering.vercel.app/
   const { device } = userAgent(req);
   // check the deviceType
   const deviceType = device.type === 'mobile' ? 'mobile' : 'desktop';
 
-  // fetch variants from Supabase
-  const result = await supabase.from('variants').select('*');
+  let { data: variants, error } = await supabase.from('variants').select('*');
 
-  if (result.error || !result.data) {
-    console.error('Error fetching variants from Supabase:', result.error);
-    // changed below to comply w/ next syntax
+  if (error || !variants) {
+    console.error('Error fetching variants from Supabase:', error);
+    // respond with a 500 status code in case of an error
     return new NextResponse('Internal Server Error', {
       status: 500,
     });
   }
-
-  // the result will contain an array of variants
-  const variants = result.data;
 
   // logic to select a variant based on weight
   function chooseVariant(
@@ -70,13 +66,14 @@ export async function dynamicMiddleware(req: NextRequest) {
   }
 
   // increment count for the chosen variant in Supabase
-  // increment function is defined in Functions under Database in supabase per https://www.youtube.com/watch?v=n5j_mrSmpyc
-  const { data, error } = await supabase.rpc('increment', {
+  // the increment function is defined in Functions under Database in supabase(https://supabase.com/dashboard/project/tawrifvzyjqcddwuqjyq/database/functions) per https://www.youtube.com/watch?v=n5j_mrSmpyc
+  let { data, error: rpcError } = await supabase.rpc('increment', {
     row_id: chosenVariant.id,
   });
 
-  // will log an error if update fails
-  // changed below to comply with next syntax
+  if (rpcError) console.error(rpcError);
+  else console.log(data);
+
   const res = NextResponse.rewrite(`/${chosenVariant.fileName}`);
 
   if (!variantID) {

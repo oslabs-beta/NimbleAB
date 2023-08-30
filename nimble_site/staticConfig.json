@@ -1,5 +1,6 @@
 [
   {
+    "experiment_path": "/blog",
     "experiment_name": "test1",
     "experiment_id": "test1id",
     "device_type": "mobile",

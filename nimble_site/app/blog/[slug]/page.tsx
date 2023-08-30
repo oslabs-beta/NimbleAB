@@ -12,18 +12,18 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
 
   if (!slug) return notFound();
   return (
-    <div className="bg-slate-700 flex flex-col items-end drop-shadow">
+    <div className='bg-slate-700 flex flex-col items-end drop-shadow'>
       <NavBar />
-      <div className="flex flex-col text-white items-center bg-slate-800 h-full w-full">
-        <h1 className="text-white text-4xl mt-10 mb-10">Title</h1>
-        <p className="textlg mb-4">
+      <div className='flex flex-col text-white items-center bg-slate-800 h-full w-full'>
+        <h1 className='text-white text-4xl mt-10 mb-10'>Variant {slug}</h1>
+        <p className='textlg mb-4'>
           You have been served variant {slug}, Which 33% of all users see!
         </p>
-        <div className="flex gap-4">
-          <p className="text-lg">Written By Team JAZ</p>
-          <p className="text-lg text-white/60">August 30, 2023</p>
+        <div className='flex gap-4'>
+          <p className='text-lg'>Written By Team JAZ</p>
+          <p className='text-lg text-white/60'>August 30, 2023</p>
         </div>
-        <p className="w-1/2 mt-6">
+        <p className='w-1/2 mt-6'>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi odio
           earum cum quidem mollitia officiis iusto laudantium excepturi
           veritatis ad, sint quam. Eum maxime, excepturi illum omnis nemo

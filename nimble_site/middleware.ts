@@ -3,6 +3,7 @@ import { NextRequest, NextResponse, userAgent } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 // importing the variants config from the JSON file
 import variantsConfig from './staticConfig.json';
+import { NextURL } from 'next/dist/server/web/next-url';
 
 // initialize Supabase client - https://supabase.com/docs/reference/javascript/initializing
 const supabaseUrl = 'https://tawrifvzyjqcddwuqjyq.supabase.co';
@@ -10,7 +11,11 @@ const supabaseKey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhd3JpZnZ6eWpxY2Rkd3VxanlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI2NTc2MjcsImV4cCI6MjAwODIzMzYyN30.-VekGbd6Iwey0Q32SQA0RxowZtqSlDptBhlt2r-GZBw';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+//initialize experiment - only input f
+// const experiment = variants.filter("exper")
+
 // defining a type for the variant with properties: id, fileName, and weight
+
 type Variant = {
   id: string;
   fileName: string;
@@ -19,11 +24,11 @@ type Variant = {
 };
 
 export const config = {
-  matcher: '/blog',
+  matcher: '/blog', //experiment path
 };
 
 // middleware function that determines which variant to serve based on device type and possibly cookie values
-export async function staticMiddleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   // extract the device details from the user agent of the request - https://nextjs.org/docs/messages/middleware-parse-user-agent
   const { device } = userAgent(req);
 
@@ -54,10 +59,11 @@ export async function staticMiddleware(req: NextRequest) {
   }
 
   // check for existing cookie
-  const expVariantID = req.cookies.get('expVariantID')?.toString();
+  const expVariantID = req.cookies.get('expVariantID')?.value;
+  console.log(expVariantID);
 
   // choose an experiment and then a variant inside the experiment
-  const experimentId = req.nextUrl.query.experimentId;
+  const experimentId = variantsConfig[0].experiment_id;
   let chosenExperiment;
 
   // prioritize experiment selection via query parameter
@@ -101,7 +107,11 @@ export async function staticMiddleware(req: NextRequest) {
     });
 
   // rewrite the request to serve the chosen variant's file
-  const res = NextResponse.rewrite(`/${chosenVariant.fileName}`);
+  // console.log(chosenVariant.id);
+  const url = req.nextUrl;
+  url.pathname = url.pathname.replace('/blog', `/blog/${chosenVariant.id}`);
+  // console.log(url);
+  const res = NextResponse.rewrite(url);
 
   // if the variant ID doesn't exist in the cookies, set it now for future requests
   if (!expVariantID) {

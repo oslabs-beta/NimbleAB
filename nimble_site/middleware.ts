@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 // importing the variants config from the JSON file
 import variantsConfig from './staticConfig.json';
 import { NextURL } from 'next/dist/server/web/next-url';
+import { v4 as uuidv4 } from 'uuid';
+import { ChildProcess } from 'child_process';
 
 // initialize Supabase client - https://supabase.com/docs/reference/javascript/initializing
 const supabaseUrl = 'https://tawrifvzyjqcddwuqjyq.supabase.co';
@@ -20,7 +22,7 @@ type Variant = {
   id: string;
   fileName: string;
   weight: number;
-  experiment_id: string;
+  // experiment_id: string;
 };
 
 export const config = {
@@ -60,42 +62,48 @@ export async function middleware(req: NextRequest) {
 
   // check for existing cookie
   const expVariantID = req.cookies.get('expVariantID')?.value;
-  console.log(expVariantID);
 
   // choose an experiment and then a variant inside the experiment
-  const experimentId = variantsConfig[0].experiment_id;
-  let chosenExperiment;
+  const experiment = variantsConfig.filter(
+    (experiments) => experiments.experiment_name === 'test1'
+  );
+
+  const experimentId = experiment[0].experiment_id; //change string based on test name
+  // console.log(experimentId);
 
   // prioritize experiment selection via query parameter
   // first check if a variant has been selected based on the expVariantID cookie
   // if not, then choose a variant based on the device type and the weights of the available variants
-  if (experimentId) {
-    chosenExperiment =
-      variantsConfig.find((e) => e.experiment_id === experimentId) ||
-      variantsConfig[0];
-  } else if (expVariantID) {
-    const [experimentID] = expVariantID.split('_');
-    chosenExperiment =
-      variantsConfig.find((e) => e.experiment_id === experimentID) ||
-      variantsConfig[0];
-  } else {
-    chosenExperiment = variantsConfig[0];
-  }
 
-  let chosenVariant;
+  let chosenExperiment: string = expVariantID
+    ? expVariantID?.split('_')[0]
+    : experimentId;
+  // console.log('chosenExperiment :>> ', chosenExperiment);
 
-  if (expVariantID) {
-    const [, variantID] = expVariantID.split('_');
-    if (chosenExperiment) {
-      chosenVariant = chosenExperiment.variants.find((v) => v.id === variantID);
-    }
+  async function getVariant(varID: string): Promise<Variant> {
+    // console.log(experiment[0].variants);
+    return experiment[0].variants.filter((variant) => variant.id === varID)[0];
   }
+  // if (expVariantID) console.log(getVariant(expVariantID?.split('_')[1]));
 
-  if (!chosenVariant) {
-    chosenVariant = chooseVariant(deviceType, chosenExperiment.variants);
-  }
+  let chosenVariant: Variant = expVariantID
+    ? await getVariant(expVariantID.split('_')[1])
+    : chooseVariant(deviceType, experiment[0].variants);
+
+  // console.log('chosenVariant :>> ', chosenVariant);
   // asynchronously call the increment RPC function in Supabase without waiting for it to complete
   // create a separate static_variants table and static_increment function for the staticConfig (https://supabase.com/dashboard/project/tawrifvzyjqcddwuqjyq/database/functions) per https://www.youtube.com/watch?v=n5j_mrSmpyc
+
+  await supabase.from('static_variants').upsert(
+    {
+      id: chosenVariant.id,
+      fileName: chosenVariant.fileName,
+      weight: chosenVariant.weight,
+      experiment_id: experimentId,
+    },
+    { onConflict: 'id' }
+  );
+
   supabase
     .rpc('static_increment', { row_id: chosenVariant.id })
     .then(({ data, error }) => {
@@ -109,21 +117,20 @@ export async function middleware(req: NextRequest) {
   // rewrite the request to serve the chosen variant's file
   // console.log(chosenVariant.id);
   const url = req.nextUrl;
-  url.pathname = url.pathname.replace('/blog', `/blog/${chosenVariant.id}`);
+  url.pathname = url.pathname.replace(
+    '/blog',
+    `/blog/${chosenVariant.fileName}`
+  );
   // console.log(url);
   const res = NextResponse.rewrite(url);
 
   // if the variant ID doesn't exist in the cookies, set it now for future requests
   if (!expVariantID) {
-    res.cookies.set(
-      'expVariantID',
-      `${chosenExperiment.experiment_id}_${chosenVariant.id}`,
-      {
-        path: '/',
-        httpOnly: true,
-        maxAge: 10 * 365 * 24 * 60 * 60, // set the cookie to expire in 10 years
-      }
-    );
+    res.cookies.set('expVariantID', `${experimentId}_${chosenVariant.id}`, {
+      path: '/',
+      httpOnly: true,
+      maxAge: 10 * 365 * 24 * 60 * 60, // set the cookie to expire in 10 years
+    });
   }
 
   // return the response with the rewritten url or any set cookies

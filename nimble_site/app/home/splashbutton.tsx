@@ -17,6 +17,6 @@ export default function SplashButton() {
 
 
     return (
-        <button className=" bg-blue-500 text-white tm-5" onClick={handleButtonClick}>Learn more about the team</button>
+        <button className="text-blue-100 font-bold tm-5" onClick={handleButtonClick}>Learn more about the team</button>
     )
 }

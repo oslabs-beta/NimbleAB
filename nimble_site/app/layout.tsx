@@ -28,7 +28,7 @@ export default function RootLayout({
         </Head>
 
       <body>
-        <main className="min-h-screen bg-background flex flex-col items-center">
+        <main className="min-h-screen bg-gradient-to-br from-black via-blue-900 to-cyan-500 flex flex-col items-center">
           {children}
         </main>
       </body>

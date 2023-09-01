@@ -30,10 +30,8 @@
   animation: animateIn 0.3s ease 0.15s both;
 }
 
-
-.shadown-bird et-in-viewport-check et-in-viewport-pulse_special
-{
-  animation: "3500ms ease 0s 1 normal forwards running pulse_special";
+.shadown-bird et-in-viewport-check et-in-viewport-pulse_special {
+  animation: '3500ms ease 0s 1 normal forwards running pulse_special';
 }
 
 @keyframes animateIn {
@@ -44,5 +42,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 100% 0%;
   }
 }

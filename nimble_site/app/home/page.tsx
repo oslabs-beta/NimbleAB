@@ -20,15 +20,17 @@ export default async function Home() {
 
   return (
     <div className='relative min-h-screen text-foreground p-6'>
-      <div className='max-w-4xl mx-auto py-8 space-y-4'>
-        <h2 className='text-3xl font-semibold text-center self-center text-blue-100'>
+      <div className='max-w-4xl mx-auto py-10 space-y-8'>
+        <h2 className='text-6xl font-semibold text-center self-center text-blue-100'>
           Welcome to NimbleLabs
         </h2>
-        <div className='bg-gradient-to-r from-purple-400 to-cyan-500 hover:from-cyan-500 hover:to-purple-400 rounded-lg p-2 shadow-md text-center self-center transition-transform transform hover:scale-105'>
-          <SplashButton />
-        </div>
-        <div className='bg-gradient-to-r from-purple-400 to-cyan-500 hover:from-cyan-500 hover:to-purple-400 rounded-lg p-2 shadow-md text-center self-center transition-transform transform hover:scale-105'>
-          <TestButton />
+        <div className='flex justify-center space-x-4'>
+          <div className='bg-gradient-to-r from-purple-400 to-cyan-500 hover:from-cyan-500 hover:to-purple-400 rounded-lg p-2 shadow-md text-center self-center transition-transform transform hover:scale-105'>
+            <TestButton />
+          </div>
+          <div className='bg-gradient-to-r from-purple-400 to-cyan-500 hover:from-cyan-500 hover:to-purple-400 rounded-lg p-2 shadow-md text-center self-center transition-transform transform hover:scale-105'>
+            <SplashButton />
+          </div>
         </div>
         <h1 className='text-xl font-bold text-center'>test</h1>
         <div id='teamPics' className='flex flex-row space-x-4 justify-center'>

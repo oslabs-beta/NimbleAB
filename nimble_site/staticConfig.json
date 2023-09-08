@@ -23,24 +23,24 @@
     ]
   },
   {
-    "experiment_path": "/home",
+    "experiment_path": "/info",
     "experiment_name": "test2",
-    "experiment_id": "test2id",
+    "experiment_id": "7ca8178f-b45a-43a3-aec3-436f651a3de2",
     "device_type": "mobile",
     "variants": [
       {
-        "id": "1",
+        "id": "8c024763-9d0a-43e6-9a81-b79ec950ac0c",
         "fileName": "variant1.html",
         "weight": 50
       },
       {
-        "id": "2",
+        "id": "669d031c-0298-45df-9db8-56345f0dcd4a",
         "fileName": "variant2.html",
         "weight": 30
       },
       {
         "id": "3",
-        "fileName": "variant3.html",
+        "fileName": "e43a3439-13fb-4291-824f-df7974087602",
         "weight": 20
       }
     ]

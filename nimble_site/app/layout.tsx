@@ -16,6 +16,7 @@ export default function RootLayout({
         {' '}
       </Script>
       <Head>
+        {/* <link rel='icon' href='./favicon.ico'/> */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

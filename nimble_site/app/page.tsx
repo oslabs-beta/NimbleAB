@@ -27,7 +27,72 @@ export default async function Index() {
           width={350}
           height={350}
         />
-        <div className='flex items-center space-x-6'>
+        <div className='flex items-center space-x-6 lg:hidden'>
+          <div className='dropdown relative'>
+            <label tabIndex={0} className='btn btn-ghost'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                className='h-5 w-5'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M4 6h16M4 12h8m-8 6h16'
+                />
+              </svg>
+            </label>
+            <ul
+              tabIndex={0}
+              className='menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52 absolute right-0 text-xl'
+            >
+              <li>
+                <a
+                  href='https://github.com/oslabs-beta/NimbleABApp'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  <img
+                    className='w-6 h-6 transition-transform duration-300 transform hover:scale-110'
+                    src='https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
+                    alt='Product GitHub Logo'
+                  />
+                </a>
+              </li>
+              <li>
+                <a
+                  className='text-gray-300 hover:underline hover:text-orange-300 transition-transform duration-300 transform hover:scale-105 text-[0.9rem]'
+                  href='https://github.com/oslabs-beta/NimbleABApp/blob/main/README.md'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  How to Use
+                </a>
+              </li>
+              <li>
+                <Link
+                  href='https://nimbleab-production-build.s3.us-east-2.amazonaws.com/NimbleAB+Setup+1.0.0.exe'
+                  className='text-gray-300 hover:underline hover:text-orange-300 transition-transform duration-300 transform hover:scale-105 text-[0.9rem]'
+                >
+                  Download Windows App
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href='https://nimbleab-production-build.s3.us-east-2.amazonaws.com/NimbleAB-1.0.0-mac.zip'
+                  className='text-gray-300 hover:underline hover:text-orange-300 transition-transform duration-300 transform hover:scale-105 pr-5 text-[0.9rem]'
+                >
+                  Download Mac App
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className='hidden lg:flex items-center space-x-6'>
           {/* github link for NimbleAB app */}
           <a
             href='https://github.com/oslabs-beta/NimbleABApp'

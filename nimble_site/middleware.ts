@@ -120,6 +120,18 @@ export async function middleware(req: NextRequest) {
   // asynchronously call the increment RPC function in Supabase without waiting for it to complete
   // create a separate static_variants table and static_increment function for the staticConfig (https://supabase.com/dashboard/project/tawrifvzyjqcddwuqjyq/database/functions) per https://www.youtube.com/watch?v=n5j_mrSmpyc
 
+  // add the experiment to the experiment_static table
+  await supabase.from('experiment_static').upsert(
+    {
+      id: experimentConfig.experiment_id,
+      experiment_name: experimentConfig.experiment_name,
+      device_type: experimentConfig.device_type,
+      experiment_path: experimentConfig.experiment_path
+    },
+    { onConflict: 'id' }
+  );
+
+  // add variant to the static_variants table
   await supabase.from('static_variants').upsert(
     {
       id: chosenVariant.id,
